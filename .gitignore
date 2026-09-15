@@ -8,5 +8,10 @@
 # files
 !/.gitignore
 !/README.md
+!/build.gradle
 !/gradlew
 !/gradlew.bat
+!/settings.gradle
+!/fieldsANDmethods.txt
+!/gradle.properties
+!/makefile
