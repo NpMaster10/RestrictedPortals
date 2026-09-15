@@ -15,17 +15,34 @@ import net.minecraft.util.ChunkCoordinates;
 import net.minecraft.util.StatCollector;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraft.block.Block;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 
 import java.util.HashMap;
 import java.util.UUID;
 
 public class TickHandler {
-	
+
 	private HashMap<UUID, PlayerPos> lastPlayerPosition = new HashMap<>();
 	
+    private void ensureBlockBelowPlayer(PlayerPos playerPos, WorldServer world) {
+    
+        int x = MathHelper.floor_double(playerPos.posX);
+        int y = MathHelper.floor_double(playerPos.posY) - 1;
+        int z = MathHelper.floor_double(playerPos.posZ);
+    
+        // Place stone only when there is no block below the player's feet
+        if (world.isAirBlock(x, y, z)) {
+            world.setBlock(x, y, z, Blocks.stone, 0, 3);
+        }
+    }
+
+
 	@SubscribeEvent
-	public void onPlayerTickEvent(TickEvent.PlayerTickEvent event)
-	{
+	public void onPlayerTickEvent(TickEvent.PlayerTickEvent event) {
 		if (event.side != Side.SERVER || event.phase == TickEvent.Phase.START)
 			return;
 		
@@ -51,20 +68,19 @@ public class TickHandler {
         			
         			player.setPositionAndUpdate(coordinates.posX, coordinates.posY + 1, coordinates.posZ);
         			
-                }else{            	
+                } else{            	
                 	MinecraftServer.getServer().getConfigurationManager().transferPlayerToDimension(player, before.getDim());
                 	player.playerNetServerHandler.setPlayerLocation(before.getX(), before.getY(), before.getZ(), before.getYaw(), before.getPitch());
             	}
+                ensureBlockBelowPlayer(before, MinecraftServer.getServer().worldServerForDimension(before.getDim()));
             }
         }
 		
 		lastPlayerPosition.put(player.getPersistentID(), new PlayerPos(event.player));
-
 	}
 
 	@SubscribeEvent
-	public void onRightClick(PlayerInteractEvent event)
-	{
+	public void onRightClick(PlayerInteractEvent event) {
 
 		if (event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK && event.entityPlayer.getHeldItem() != null)
 		{
@@ -86,24 +102,191 @@ public class TickHandler {
 	}
 	
 	@SubscribeEvent
-	public void onPlayerMoveEvent(PlayerMoveEvent e){
-		
+	public void onPlayerMoveEvent(PlayerMoveEvent e) {
 		EntityPlayerMP player = (EntityPlayerMP) e.entityPlayer;
-		
-		if (e.before.dim != e.entityPlayer.dimension){
-			
-		//Nether
-		if (RestrictedPortals.netherLock && e.entityPlayer.dimension == -1 && ! player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.netherUnlock)){
-			player.addChatComponentMessage(new ChatComponentTranslation("Sorry, You need to make a " + StatCollector.translateToLocal(RestrictedPortals.netherItem.getUnlocalizedName() + ".name") + " first"));
-			e.setCanceled(true);
+
+		if (e.before.dim != e.entityPlayer.dimension) {
+			int dimension = e.entityPlayer.dimension;
+
+			if (RestrictedPortals.netherLock && dimension == -1
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.netherUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.netherItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.endLock && dimension == 1
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.endUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.endItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.abandonedCavesLock && dimension == RestrictedPortals.abandonedCavesId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.abandonedCavesUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.abandonedCavesItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.bedrockPlainsLock && dimension == RestrictedPortals.bedrockPlainsId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.bedrockPlainsUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.bedrockPlainsItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.compressedLock && dimension == RestrictedPortals.compressedId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.compressedUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.compressedItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.crystalLock && dimension == RestrictedPortals.crystalId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.crystalUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.crystalItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.darknessLock && dimension == RestrictedPortals.darknessId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.darknessUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.darknessItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.deepWorldLock && dimension == RestrictedPortals.deepWorldId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.deepWorldUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.deepWorldItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.dropLock && dimension == RestrictedPortals.dropId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.dropUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.dropItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.evilLock && dimension == RestrictedPortals.evilId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.evilUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.evilItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.farVoidLock && dimension == RestrictedPortals.farVoidId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.farVoidUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.farVoidItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.finalLabyrinthLock && dimension == RestrictedPortals.finalLabyrinthId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.finalLabyrinthUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.finalLabyrinthItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.forgottenLock && dimension == RestrictedPortals.forgottenId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.forgottenUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.forgottenItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.lavaLock && dimension == RestrictedPortals.lavaId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.lavaUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.lavaItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.mazeLock && dimension == RestrictedPortals.mazeId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.mazeUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.mazeItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.mutationLock && dimension == RestrictedPortals.mutationId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.mutationUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.mutationItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.nearNetherLock && dimension == RestrictedPortals.nearNetherId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.nearNetherUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.nearNetherItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
+
+			if (RestrictedPortals.nearVoidLock && dimension == RestrictedPortals.nearVoidId
+					&& !player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.nearVoidUnlock)) {
+				player.addChatComponentMessage(new ChatComponentTranslation(
+						"Sorry, You need to make a "
+								+ StatCollector.translateToLocal(
+										RestrictedPortals.nearVoidItem.getUnlocalizedName() + ".name")
+								+ " first"));
+				e.setCanceled(true);
+			}
 		}
-		
-		//End
-		if (RestrictedPortals.endLock && e.entityPlayer.dimension == 1 && ! player.func_147099_x().hasAchievementUnlocked(RestrictedPortals.endUnlock)){
-			player.addChatComponentMessage(new ChatComponentTranslation("Sorry, You need to make a " + StatCollector.translateToLocal(RestrictedPortals.endItem.getUnlocalizedName() + ".name") + " first"));
-			e.setCanceled(true);
-		}
-		}
-		
 	}
 }
